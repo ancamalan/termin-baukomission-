@@ -1,0 +1,26 @@
+name: termin
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install playwright && playwright install --with-deps chromium
+      - run: python termin_agent.py
+        env:
+          HEADLESS: "1"
+          ONCE: "1"
+          NTFY_TOPIC: anca-termin-8472
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: "*.png"
+          if-no-files-found: ignore
